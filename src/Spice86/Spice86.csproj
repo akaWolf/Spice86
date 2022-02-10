@@ -17,6 +17,9 @@
 	<PackageTags>Reverse;Engineering;AvaloniaUI;GDB;Emulator;Cross;Platform</PackageTags>
   </PropertyGroup>
   <ItemGroup>
+	<PackageReference Include="Dock.Avalonia.Themes.Default" Version="0.10.0" />
+	<PackageReference Include="Dock.Model.ReactiveUI" Version="0.10.12" />
+	<PackageReference Include="Dock.Serializer" Version="0.10.12" />
 	<PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.1.2">
 		<PrivateAssets>all</PrivateAssets>
 		<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
