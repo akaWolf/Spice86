@@ -1,11 +1,11 @@
-namespace Spice86.UI.Views;
+namespace Spice86.Ui.Views;
 
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 
-using Spice86.UI.ViewModels;
+using Spice86.Ui.ViewModels;
 
 using System;
 using System.ComponentModel;

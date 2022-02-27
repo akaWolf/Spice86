@@ -7,7 +7,7 @@ using Serilog;
 using Serilog.Events;
 
 using Spice86.Emulator;
-using Spice86.UI;
+using Spice86.Ui;
 
 using System;
 using System.Linq;

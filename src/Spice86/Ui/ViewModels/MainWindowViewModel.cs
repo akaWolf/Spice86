@@ -1,4 +1,4 @@
-﻿namespace Spice86.UI.ViewModels;
+﻿namespace Spice86.Ui.ViewModels;
 
 using Avalonia.Collections;
 using Avalonia.Controls;
@@ -41,8 +41,11 @@ public class MainWindowViewModel : ViewModelBase, IVideoKeyboardMouseIO, IDispos
     ManualResetEvent _okayToContinueEvent = new ManualResetEvent(true);
 
     private bool _isPaused = false;
+    private MemoryViewModel? _memoryViewModel;
 
     public bool IsPaused { get => _isPaused; set => this.RaiseAndSetIfChanged(ref _isPaused, value); }
+
+    public MemoryViewModel? MemoryViewModel { get => _memoryViewModel; private set => this.RaiseAndSetIfChanged(ref _memoryViewModel, value); }
 
     public ReactiveCommand<Unit, Unit> PlayCommand { get; private set; }
     public ReactiveCommand<Unit, Unit> PauseCommand { get; private set; }
@@ -243,6 +246,7 @@ public class MainWindowViewModel : ViewModelBase, IVideoKeyboardMouseIO, IDispos
         try {
             _okayToContinueEvent.Set();
             _programExecutor = new ProgramExecutor(this, _configuration);
+            MemoryViewModel = new(_programExecutor);
             _programExecutor.Run();
         } catch (Exception e) {
             if (_logger.IsEnabled(Serilog.Events.LogEventLevel.Error)) {

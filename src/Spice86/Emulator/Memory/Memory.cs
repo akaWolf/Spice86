@@ -1,5 +1,7 @@
 ﻿namespace Spice86.Emulator.Memory;
 
+using ReactiveUI;
+
 using Spice86.Emulator.Errors;
 using Spice86.Emulator.VM.Breakpoint;
 
@@ -8,8 +10,8 @@ using System.Collections.Generic;
 using System.IO;
 
 /// <summary> Addressable memory of the machine. </summary>
-public class Memory {
-    private readonly byte[] _physicalMemory;
+public class Memory : ReactiveObject {
+    private byte[] _physicalMemory;
 
     private readonly BreakPointHolder _readBreakPoints = new();
 
@@ -17,21 +19,22 @@ public class Memory {
 
     public Memory(uint size) {
         this._physicalMemory = new byte[size];
+        this.RaisePropertyChanged(nameof(Ram));
     }
 
     public void DumpToFile(string path) {
-        File.WriteAllBytes(path, _physicalMemory);
+        File.WriteAllBytes(path, Ram);
     }
 
     public byte[] GetData(uint address, int length) {
         byte[] res = new byte[length];
-        Array.Copy(_physicalMemory, address, res, 0, length);
+        Array.Copy(Ram, address, res, 0, length);
         return res;
     }
 
-    public byte[] Ram => _physicalMemory;
+    public byte[] Ram { get => _physicalMemory; set => this.RaiseAndSetIfChanged(ref _physicalMemory, value); }
 
-    public int Size => _physicalMemory.Length;
+    public int Size => Ram.Length;
 
     public byte this[uint i] {
         get { return GetUint8(i); }
@@ -50,19 +53,19 @@ public class Memory {
 
 
     public ushort GetUint16(uint address) {
-        ushort res = MemoryUtils.GetUint16(_physicalMemory, address);
+        ushort res = MemoryUtils.GetUint16(Ram, address);
         MonitorReadAccess(address);
         return res;
     }
 
     public uint GetUint32(uint address) {
-        var res = MemoryUtils.GetUint32(_physicalMemory, address);
+        var res = MemoryUtils.GetUint32(Ram, address);
         MonitorReadAccess(address);
         return res;
     }
 
     public byte GetUint8(uint addr) {
-        var res = MemoryUtils.GetUint8(_physicalMemory, addr);
+        var res = MemoryUtils.GetUint8(Ram, addr);
         MonitorReadAccess(addr);
         return res;
     }
@@ -73,31 +76,31 @@ public class Memory {
 
     public void LoadData(uint address, byte[] data, int length) {
         MonitorRangeWriteAccess(address, (uint)(address + length));
-        Array.Copy(data, 0, _physicalMemory, address, length);
+        Array.Copy(data, 0, Ram, address, length);
     }
 
     public void MemCopy(uint sourceAddress, uint destinationAddress, int length) {
-        Array.Copy(_physicalMemory, sourceAddress, _physicalMemory, destinationAddress, length);
+        Array.Copy(Ram, sourceAddress, Ram, destinationAddress, length);
     }
 
     public void Memset(uint address, byte value, uint length) {
-        Array.Fill(_physicalMemory, value, (int)address, (int)length);
+        Array.Fill(Ram, value, (int)address, (int)length);
     }
 
     public uint? SearchValue(uint address, int len, IList<byte> value) {
         int end = (int)(address + len);
-        if (end >= _physicalMemory.Length) {
-            end = _physicalMemory.Length;
+        if (end >= Ram.Length) {
+            end = Ram.Length;
         }
 
         for (long i = address; i < end; i++) {
             long endValue = value.Count;
-            if (endValue + i >= _physicalMemory.Length) {
-                endValue = _physicalMemory.Length - i;
+            if (endValue + i >= Ram.Length) {
+                endValue = Ram.Length - i;
             }
 
             int j = 0;
-            while (j < endValue && _physicalMemory[i + j] == value[j]) {
+            while (j < endValue && Ram[i + j] == value[j]) {
                 j++;
             }
 
@@ -111,19 +114,19 @@ public class Memory {
 
     public void SetUint16(uint address, ushort value) {
         MonitorWriteAccess(address);
-        MemoryUtils.SetUint16(_physicalMemory, address, value);
+        MemoryUtils.SetUint16(Ram, address, value);
     }
 
     public void SetUint32(uint address, uint value) {
         MonitorWriteAccess(address);
 
         // For convenience, no get as 16 bit apps are not supposed call this directly
-        MemoryUtils.SetUint32(_physicalMemory, address, value);
+        MemoryUtils.SetUint32(Ram, address, value);
     }
 
     public void SetUint8(uint address, byte value) {
         MonitorWriteAccess(address);
-        MemoryUtils.SetUint8(_physicalMemory, address, value);
+        MemoryUtils.SetUint8(Ram, address, value);
     }
 
     public void ToggleBreakPoint(BreakPoint breakPoint, bool on) {

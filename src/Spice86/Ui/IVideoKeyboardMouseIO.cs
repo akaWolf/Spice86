@@ -1,9 +1,9 @@
-﻿namespace Spice86.UI;
+﻿namespace Spice86.Ui;
 
 using Avalonia.Input;
 
 using Spice86.Emulator.Devices.Video;
-using Spice86.UI.ViewModels;
+using Spice86.Ui.ViewModels;
 
 using System;
 using System.Collections.Generic;

@@ -9,7 +9,7 @@ using Spice86.Emulator.Function.Dump;
 using Spice86.Emulator.VM;
 using Spice86.Emulator.VM.Breakpoint;
 using Spice86.Emulator.Memory;
-using Spice86.UI;
+using Spice86.Ui;
 using Spice86.Utils;
 
 using System;
@@ -17,7 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-using Spice86.UI.ViewModels;
+using Spice86.Ui.ViewModels;
 
 /// <summary>
 /// Handles custom GDB commands triggered in command line via the monitor prefix.<br/>

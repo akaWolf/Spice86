@@ -69,4 +69,9 @@
 	<ItemGroup>
 		<AvaloniaResource Include="Ui\Views\Spice86.ico" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Compile Update="Ui\Views\MemoryView.axaml.cs">
+	    <DependentUpon>MemoryView.axaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
 </Project>

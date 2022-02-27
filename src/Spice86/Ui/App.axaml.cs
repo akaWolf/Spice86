@@ -1,4 +1,4 @@
-namespace Spice86.UI;
+namespace Spice86.Ui;
 
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -6,8 +6,8 @@ using Avalonia.Markup.Xaml;
 
 using Microsoft.Win32;
 
-using Spice86.UI.ViewModels;
-using Spice86.UI.Views;
+using Spice86.Ui.ViewModels;
+using Spice86.Ui.Views;
 
 using System;
 using System.Runtime.Versioning;

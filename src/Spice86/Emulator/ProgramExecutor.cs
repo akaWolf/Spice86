@@ -15,7 +15,7 @@ using Spice86.Emulator.Loadablefile.Dos.Exe;
 using Spice86.Emulator.LoadableFile;
 using Spice86.Emulator.Memory;
 using Spice86.Emulator.VM;
-using Spice86.UI;
+using Spice86.Ui;
 using Spice86.Utils;
 
 using System;

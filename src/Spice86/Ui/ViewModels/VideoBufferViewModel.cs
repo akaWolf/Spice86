@@ -1,4 +1,4 @@
-﻿namespace Spice86.UI.ViewModels;
+﻿namespace Spice86.Ui.ViewModels;
 
 using Avalonia;
 using Avalonia.Controls;
@@ -10,7 +10,7 @@ using Avalonia.Threading;
 using ReactiveUI;
 
 using Spice86.Emulator.Devices.Video;
-using Spice86.UI.Views;
+using Spice86.Ui.Views;
 
 using System;
 using System.Reactive;

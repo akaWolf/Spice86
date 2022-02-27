@@ -4,7 +4,7 @@ using Serilog;
 
 using Spice86.Emulator.Callback;
 using Spice86.Emulator.VM;
-using Spice86.UI;
+using Spice86.Ui;
 
 /// <summary>
 /// Interface between the mouse and the emulator.<br/>

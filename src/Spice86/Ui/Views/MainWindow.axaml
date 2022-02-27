@@ -1,11 +1,11 @@
 <Window xmlns="https://github.com/avaloniaui"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-		xmlns:vm="using:Spice86.UI.ViewModels"
-		xmlns:local="using:Spice86.UI.Views"
+		xmlns:vm="using:Spice86.Ui.ViewModels"
+		xmlns:local="using:Spice86.Ui.Views"
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-		x:Class="Spice86.UI.Views.MainWindow"
+		x:Class="Spice86.Ui.Views.MainWindow"
 		Icon="Spice86.ico"
 		Title="{Binding MainTitle}"
 		MinWidth="1152"
@@ -17,40 +17,47 @@
 	<Design.DataContext>
 		<vm:MainWindowViewModel />
 	</Design.DataContext>
-	<WrapPanel Orientation="Horizontal">
-		<Menu>
-			<MenuItem Header="⏸︎" Command="{Binding PauseCommand}" HotKey="Alt+Pause" IsVisible="{Binding !IsPaused}" />
-			<MenuItem Header="⏵︎" Command="{Binding PlayCommand}" HotKey="F5" IsVisible="{Binding IsPaused}" />
-		</Menu>
-		<ItemsRepeater Items="{Binding VideoBuffers}">
-			<ItemsRepeater.ItemTemplate>
-				<DataTemplate x:DataType="vm:VideoBufferViewModel">
-					<WrapPanel Orientation="Horizontal">
-						<Menu>
-							<MenuItem Header="Options">
-								<Label Content="{Binding Address, StringFormat={}0x{0:X}}" />
-								<MenuItem>
-									<MenuItem.Header>
-										<StackPanel Orientation="Horizontal">
-											<Label Content="Scale" HorizontalContentAlignment="Center" />
-											<NumericUpDown Text="{Binding Scale}" Margin="5,0,0,0" />
-										</StackPanel>
-									</MenuItem.Header>
-								</MenuItem>
-								<MenuItem IsVisible="{Binding IsPrimaryDisplay}">
-									<MenuItem.Header>
-										<CheckBox Content="Show Cursor" IsChecked="{Binding ShowCursor}" />
-									</MenuItem.Header>
-								</MenuItem>
-							</MenuItem>
-						</Menu>
-						<local:VideoBufferView />
-					</WrapPanel>
-				</DataTemplate>
-			</ItemsRepeater.ItemTemplate>
-			<ItemsRepeater.Layout>
-				<StackLayout Orientation="Horizontal" Spacing="8" />
-			</ItemsRepeater.Layout>
-		</ItemsRepeater>
-	</WrapPanel>
+	<TabControl>
+		<TabItem Header="Gameplay">
+			<WrapPanel Orientation="Horizontal">
+				<Menu>
+					<MenuItem Header="⏸︎" Command="{Binding PauseCommand}" HotKey="Alt+Pause" IsVisible="{Binding !IsPaused}" />
+					<MenuItem Header="⏵︎" Command="{Binding PlayCommand}" HotKey="F5" IsVisible="{Binding IsPaused}" />
+				</Menu>
+				<ItemsRepeater Items="{Binding VideoBuffers}">
+					<ItemsRepeater.ItemTemplate>
+						<DataTemplate x:DataType="vm:VideoBufferViewModel">
+							<WrapPanel Orientation="Horizontal">
+								<Menu>
+									<MenuItem Header="Options">
+										<Label Content="{Binding Address, StringFormat={}0x{0:X}}" />
+										<MenuItem>
+											<MenuItem.Header>
+												<StackPanel Orientation="Horizontal">
+													<Label Content="Scale" HorizontalContentAlignment="Center" />
+													<NumericUpDown Text="{Binding Scale}" Margin="5,0,0,0" />
+												</StackPanel>
+											</MenuItem.Header>
+										</MenuItem>
+										<MenuItem IsVisible="{Binding IsPrimaryDisplay}">
+											<MenuItem.Header>
+												<CheckBox Content="Show Cursor" IsChecked="{Binding ShowCursor}" />
+											</MenuItem.Header>
+										</MenuItem>
+									</MenuItem>
+								</Menu>
+								<local:VideoBufferView />
+							</WrapPanel>
+						</DataTemplate>
+					</ItemsRepeater.ItemTemplate>
+					<ItemsRepeater.Layout>
+						<StackLayout Orientation="Horizontal" Spacing="8" />
+					</ItemsRepeater.Layout>
+				</ItemsRepeater>
+			</WrapPanel>
+		</TabItem>
+		<TabItem Header="Memory">
+			<local:MemoryView DataContext="{Binding MemoryViewModel}" />
+		</TabItem>
+	</TabControl>
 </Window>
