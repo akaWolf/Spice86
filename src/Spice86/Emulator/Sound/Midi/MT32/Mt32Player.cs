@@ -3,43 +3,88 @@
 using Mt32emu;
 
 using System;
+using System.Threading;
 using System.IO;
 using System.IO.Compression;
 
 using TinyAudio;
 
+using OpenTK.Audio.OpenAL;
+using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
+
 internal sealed class Mt32Player : IDisposable {
-    private readonly Mt32Context context = new();
-    private readonly AudioPlayer? audioPlayer;
-    private bool disposed;
+    private readonly Mt32Context _mt32context = new();
+    private readonly AudioPlayer? _windowsAudioPlayer;
+    private bool _disposed;
+    private readonly ALContext? _alContext;
+    private readonly ALDevice? _alDevice;
+    private readonly int _alBufferId;
+    private readonly int _alSourceId;
+    private readonly Thread? _alThread;
+    private readonly short[] _alBuffer = new short[100];
 
     public Mt32Player(string romsPath, Configuration configuration) {
         if (string.IsNullOrWhiteSpace(romsPath)) {
             throw new ArgumentNullException(nameof(romsPath));
         }
+        if (!configuration.CreateAudioBackend) {
+            return;
+        }
 
-        if (configuration.CreateAudioBackend == false) {
-            return;
-        }
-        audioPlayer = Audio.CreatePlayer(true);
-        if (audioPlayer is null) {
-            return;
-        }
-        if (!OperatingSystem.IsWindows()) {
-            return;
-        }
         LoadRoms(romsPath);
+        AnalogOutputMode analogMode = Mt32GlobalState.GetBestAnalogOutputMode(48000);
+        _mt32context.AnalogOutputMode = analogMode;
+        _mt32context.SetSampleRate(48000);
+        _mt32context.OpenSynth();
 
-        AnalogOutputMode analogMode = Mt32GlobalState.GetBestAnalogOutputMode(audioPlayer.Format.SampleRate);
-        context.AnalogOutputMode = analogMode;
-        context.SetSampleRate(audioPlayer.Format.SampleRate);
-
-        context.OpenSynth();
-        audioPlayer.BeginPlayback(this.FillBuffer);
+        if (OperatingSystem.IsWindows()) {
+            _windowsAudioPlayer = Audio.CreatePlayer();
+            _windowsAudioPlayer?.BeginPlayback(this.FillBuffer);
+        }
+        else {
+            _alDevice = new ALDevice();
+            _alContext = new ALContext(_alDevice.Value);
+            _alSourceId = AL.GenSource();
+            _alBufferId = AL.GenBuffer();
+            AL.SourceQueueBuffer(_alSourceId, _alBufferId);
+            AL.SourcePlay(_alSourceId);
+            _alThread = new Thread(ALThread);
+            _alThread.Start();
+        }
     }
 
-    public void PlayShortMessage(uint message) => context.PlayMessage(message);
-    public void PlaySysex(ReadOnlySpan<byte> data) => context.PlaySysex(data);
+    private unsafe void ALThread() {
+        //OpenAL, how does it work ?
+        //FIXME: CPU usage (AutoManualResetEvent)
+        while(true) {
+            Span<byte> buffer = MemoryMarshal.AsBytes<short>(_alBuffer);
+            int samplesWritten = 0;
+            try {
+                _mt32context.Render(MemoryMarshal.Cast<byte, short>(buffer));
+                samplesWritten = buffer.Length;
+                fixed(byte* buf = buffer) {
+                    AL.BufferData(_alBufferId, ALFormat.Stereo16, buf, samplesWritten, 48000);
+                }
+                AL.GetSource(_alSourceId, ALGetSourcei.BuffersQueued, out int queued_count);
+                if (queued_count > 0)
+                    {
+                        AL.GetSource(_alSourceId, ALGetSourcei.SourceState, out int state);
+                        if ((ALSourceState)state != ALSourceState.Playing)
+                        {
+                            AL.SourcePlay(_alSourceId);
+                        }
+                    }
+            } catch (ObjectDisposedException) {
+                buffer.Clear();
+                samplesWritten = 0;
+            }
+        }
+    }
+
+    public void PlayShortMessage(uint message) => _mt32context.PlayMessage(message);
+    public void PlaySysex(ReadOnlySpan<byte> data) => _mt32context.PlaySysex(data);
+
     public void Pause() {
         if (!OperatingSystem.IsWindows()) {
             return;
@@ -57,18 +102,23 @@ internal sealed class Mt32Player : IDisposable {
     }
 
     public void Dispose() {
-        if (!disposed) {
-            context.Dispose();
+        if (!_disposed) {
+            _mt32context.Dispose();
             if (OperatingSystem.IsWindows()) {
-                audioPlayer?.Dispose();
+                _windowsAudioPlayer?.Dispose();
             }
-            disposed = true;
+            else {
+                AL.SourceStop(_alSourceId);
+                AL.DeleteSource(_alSourceId);
+                AL.DeleteBuffer(_alBufferId);
+            }
+            _disposed = true;
         }
     }
 
     private void FillBuffer(Span<float> buffer, out int samplesWritten) {
         try {
-            context.Render(buffer);
+            _mt32context.Render(buffer);
             samplesWritten = buffer.Length;
         } catch (ObjectDisposedException) {
             buffer.Clear();
@@ -81,12 +131,12 @@ internal sealed class Mt32Player : IDisposable {
             foreach (ZipArchiveEntry? entry in zip.Entries) {
                 if (entry.FullName.EndsWith(".ROM", StringComparison.OrdinalIgnoreCase)) {
                     using Stream? stream = entry.Open();
-                    context.AddRom(stream);
+                    _mt32context.AddRom(stream);
                 }
             }
         } else if (Directory.Exists(path)) {
             foreach (string? fileName in Directory.EnumerateFiles(path, "*.ROM")) {
-                context.AddRom(fileName);
+                _mt32context.AddRom(fileName);
             }
         }
     }

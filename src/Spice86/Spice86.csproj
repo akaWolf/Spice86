@@ -70,10 +70,13 @@
 		<PackageReference Include="Avalonia.Desktop" Version="0.10.13" />
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
 		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="0.10.13" />
+		<!-- Warning: No Mac version of the native MUNT library is included in the MT-32 emu package. -->
 		<PackageReference Include="Mt32emu.net" Version="1.0.0-rc.1" />
 		<!-- WARNING: TinyAudio is Windows-only right now -->
 		<PackageReference Include="TinyAudio" Version="0.3.1" />
 		<PackageReference Include="Ymf262Emu" Version="1.0.1" />
+		<PackageReference Include="OpenTK.OpenAL" Version="4.7.1" />
+		<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<AvaloniaResource Include="Ui\Views\Spice86.ico" />
